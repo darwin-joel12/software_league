@@ -1,8 +1,8 @@
 FROM php:8.2-apache
 
-# 1. Instalar extensiones necesarias
+# 1. Instalar extensiones necesarias (CORREGIDO: libzip-dev)
 RUN apt-get update && apt-get install -y \
-    libpng-dev zlib1g-dev libxml2-dev libzip-dir zip unzip \
+    libpng-dev zlib1g-dev libxml2-dev libzip-dev zip unzip \
     && docker-php-ext-install pdo_mysql gd zip
 
 # 2. Configurar Apache para Render
