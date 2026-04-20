@@ -1,9 +1,29 @@
 FROM php:8.2-apache
-RUN apt-get update && apt-get install -y libpng-dev zlib1g-dev libxml2-dev libzip-dev zip unzip
-RUN docker-php-ext-install pdo_mysql gd zip
+
+# Instalar dependencias del sistema y extensiones de PHP
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    zlib1g-dev \
+    libxml2-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo_mysql gd zip
+
+# Habilitar mod_rewrite para Laravel
+RUN a2enmod rewrite
+
+# Copiar el proyecto
 COPY . /var/www/html
-WORKDIR /var/www/html
+
+# Ajustar el DocumentRoot de Apache a la carpeta /public de Laravel
+RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
+
+# Instalar Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/cache
-CMD php artisan serve --host 0.0.0.0 --port $PORT
+
+# Instalar dependencias de Laravel
+RUN composer install --no-dev --optimize-autoloader
+
+# Permisos para Laravel (Solo carpetas que sí existen)
+RUN chown -R www-data:www-data /var/www/html/storage
